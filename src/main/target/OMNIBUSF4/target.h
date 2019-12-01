@@ -147,7 +147,7 @@
 
 #define USE_UART3
 #define UART3_RX_PIN            PB11
-#define UART3_TX_PIN            PB10
+#define UART3_TX_PIN            NONE
 
 #define USE_UART6
 #define UART6_RX_PIN            PC7
@@ -191,8 +191,8 @@
 
 #else                                   // One softserial on versions other than OMNIBUSF4V3
 #define USE_SOFTSERIAL1
-#define SOFTSERIAL_1_RX_PIN     PC8     // pad labelled CH5 on OMNIBUSF4PRO
-#define SOFTSERIAL_1_TX_PIN     PC9     // pad labelled CH6 on OMNIBUSF4PRO
+#define SOFTSERIAL_1_RX_PIN     NONE     // pad labelled CH5 on OMNIBUSF4PRO
+#define SOFTSERIAL_1_TX_PIN     PB10     // pad labelled CH6 on OMNIBUSF4PRO
 
 #define SERIAL_PORT_COUNT       5       // VCP, USART1, USART3, USART6, SOFTSERIAL1
 #endif
