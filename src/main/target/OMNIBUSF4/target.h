@@ -142,7 +142,9 @@
 #define UART1_TX_PIN            PA9
 #define UART1_AHB1_PERIPHERALS  RCC_AHB1Periph_DMA2
 #if defined(OMNIBUSF4PRO) || defined(OMNIBUSF4PRO_LEDSTRIPM5)
-#define INVERTER_PIN_UART1_RX PC0 // PC0 has never been used as inverter control on genuine OMNIBUS F4 variants, but leave it as is since some clones actually implement it.
+  #define INVERTER_PIN_UART6      PC8 // Omnibus F4 V3 and later
+  #define INVERTER_PIN_UART3      PC9 // Omnibus F4 Pro Corners
+// #define INVERTER_PIN_UART1_RX PC0 // PC0 has never been used as inverter control on genuine OMNIBUS F4 variants, but leave it as is since some clones actually implement it.
 #endif
 
 #define USE_UART3
