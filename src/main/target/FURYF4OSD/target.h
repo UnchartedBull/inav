@@ -17,9 +17,13 @@
 
 #pragma once
 
+#ifdef MAMBAF405
+#define TARGET_BOARD_IDENTIFIER "MBF4"
+#define USBD_PRODUCT_STRING     "MAMBAF405"
+#else
 #define TARGET_BOARD_IDENTIFIER "FYF4"
-
 #define USBD_PRODUCT_STRING     "FuryF4"
+#endif
 
 #define LED0                    PB5
 #define LED1                    PB4
@@ -31,29 +35,19 @@
 #define USE_SPI
 #define USE_SPI_DEVICE_1
 
+#define USE_IMU_MPU6500
+#define IMU_MPU6500_ALIGN       CW180_DEG
 #define MPU6500_CS_PIN          PA4
 #define MPU6500_SPI_BUS         BUS_SPI1
 
+#define USE_IMU_MPU6000
+#define IMU_MPU6000_ALIGN       CW180_DEG
 #define MPU6000_CS_PIN          PA4
 #define MPU6000_SPI_BUS         BUS_SPI1
 
 #define USE_EXTI
 #define GYRO_INT_EXTI            PC4
 #define USE_MPU_DATA_READY_SIGNAL
-
-#define USE_GYRO
-#define USE_GYRO_MPU6500
-#define GYRO_MPU6500_ALIGN      CW180_DEG
-
-#define USE_GYRO_MPU6000
-#define GYRO_MPU6000_ALIGN      CW180_DEG
-
-#define USE_ACC
-#define USE_ACC_MPU6500
-#define ACC_MPU6500_ALIGN       CW180_DEG
-
-#define USE_ACC_MPU6000
-#define ACC_MPU6000_ALIGN       CW180_DEG
 
 #define ENABLE_BLACKBOX_LOGGING_ON_SPIFLASH_BY_DEFAULT
 #define USE_SPI_DEVICE_3
