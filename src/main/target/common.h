@@ -44,6 +44,11 @@
 #define SKIP_CLI_RESOURCES
 #endif
 
+#if defined(STM32F4) || defined(STM32F7)
+#define USE_USB_MSC
+#define USE_SERVO_SBUS
+#endif
+
 #define USE_ADC_AVERAGING
 #define USE_64BIT_TIME
 #define USE_BLACKBOX
@@ -54,9 +59,6 @@
 #define USE_TELEMETRY_LTM
 #define USE_TELEMETRY_FRSKY
 
-#define USE_GYRO_BIQUAD_RC_FIR2
-#define USE_MR_BRAKING_MODE
-
 #if defined(STM_FAST_TARGET)
 #define SCHEDULER_DELAY_LIMIT           10
 #else
@@ -64,7 +66,13 @@
 #endif
 
 #if (FLASH_SIZE > 256)
+#define USE_MR_BRAKING_MODE
+#define USE_PITOT
+#define USE_PITOT_ADC
+#define USE_PITOT_VIRTUAL
+
 #define USE_DYNAMIC_FILTERS
+#define USE_GYRO_KALMAN
 #define USE_EXTENDED_CMS_MENUS
 #define USE_UAV_INTERCONNECT
 #define USE_RX_UIB
@@ -104,6 +112,7 @@
 
 #define USE_TELEMETRY_SIM
 #define USE_FRSKYOSD
+#define USE_DJI_HD_OSD
 
 #define NAV_NON_VOLATILE_WAYPOINT_CLI
 
@@ -121,10 +130,6 @@
 #define USE_AUTOTUNE_FIXED_WING
 #define USE_LOG
 #define USE_STATS
-#define USE_GYRO_NOTCH_1
-#define USE_GYRO_NOTCH_2
-#define USE_DTERM_NOTCH
-#define USE_ACC_NOTCH
 #define USE_CMS
 #define CMS_MENU_OSD
 #define USE_GPS_PROTO_NMEA
@@ -149,9 +154,6 @@
 #define USE_SERIAL_PASSTHROUGH
 #define NAV_MAX_WAYPOINTS       60
 #define USE_RCDEVICE
-#define USE_PITOT
-#define USE_PITOT_ADC
-#define USE_PITOT_VIRTUAL
 
 //Enable VTX control
 #define USE_VTX_CONTROL
