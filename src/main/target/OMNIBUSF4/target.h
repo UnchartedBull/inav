@@ -139,13 +139,10 @@
 #define INVERTER_PIN_UART1_RX PC0 // PC0 has never been used as inverter control on genuine OMNIBUS F4 variants, but leave it as is since some clones actually implement it.
 #endif
 
-#define USE_UART3
-#define UART3_RX_PIN            PB11
-#define UART3_TX_PIN            PB10
+#define USE_UART5
+#define UART5_RX_PIN            PD2
+#define UART5_TX_PIN            NONE
 
-#define USE_UART6
-#define UART6_RX_PIN            PC7
-#define UART6_TX_PIN            PC6
 #if defined(OMNIBUSF4V3)
   #define INVERTER_PIN_UART6_RX PC8
   #define INVERTER_PIN_UART6_TX PC9
@@ -185,10 +182,10 @@
 
 #else                                   // One softserial on versions other than OMNIBUSF4V3
 #define USE_SOFTSERIAL1
-#define SOFTSERIAL_1_RX_PIN     PC8     // pad labelled CH5 on OMNIBUSF4PRO
-#define SOFTSERIAL_1_TX_PIN     PC9     // pad labelled CH6 on OMNIBUSF4PRO
+#define SOFTSERIAL_1_RX_PIN     PB1     // pad labelled CH5 on OMNIBUSF4PRO
+#define SOFTSERIAL_1_TX_PIN     PB1     // pad labelled CH6 on OMNIBUSF4PRO
 
-#define SERIAL_PORT_COUNT       5       // VCP, USART1, USART3, USART6, SOFTSERIAL1
+#define SERIAL_PORT_COUNT       4       // VCP, USART1, USART3, USART6, SOFTSERIAL1
 #endif
 
 #define USE_SPI
@@ -259,7 +256,9 @@
   #define WS2811_PIN                   PA1
 #endif
 
-#define DEFAULT_RX_TYPE         RX_TYPE_PPM
+#define DEFAULT_RX_TYPE         RX_TYPE_SERIAL
+#define SERIALRX_PROVIDER       SERIALRX_SBUS
+#define SERIALRX_UART           SERIAL_PORT_USART5
 #define DISABLE_RX_PWM_FEATURE
 #define DEFAULT_FEATURES        (FEATURE_TX_PROF_SEL | FEATURE_BLACKBOX | FEATURE_VBAT | FEATURE_OSD)
 
