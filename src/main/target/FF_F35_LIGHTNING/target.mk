@@ -13,5 +13,6 @@ TARGET_SRC = \
              drivers/rangefinder/rangefinder_hcsr04.c \
              drivers/serial_softserial.c \
              drivers/serial_usb_vcp.c \
+						 drivers/light_ws2811strip.c \
              drivers/max7456.c
 

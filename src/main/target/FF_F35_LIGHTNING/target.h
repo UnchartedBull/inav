@@ -63,7 +63,7 @@
 
 #define USE_UART2
 #define UART2_RX_PIN            PA3
-#define UART2_TX_PIN            PA2
+#define UART2_TX_PIN            NONE
 
 #define USE_UART3
 #define UART3_RX_PIN            PB11
@@ -132,6 +132,9 @@
 
 // Number of available PWM outputs
 #define MAX_PWM_OUTPUT_PORTS       6
+
+#define USE_LED_STRIP
+#define WS2811_PIN               PA2
 
 #define USE_SERIAL_4WAY_BLHELI_INTERFACE
 

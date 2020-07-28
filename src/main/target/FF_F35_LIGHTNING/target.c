@@ -30,7 +30,7 @@ const timerHardware_t timerHardware[] = {
     DEF_TIM(TIM3,  CH3, PB0,  TIM_USE_MC_MOTOR | TIM_USE_FW_SERVO, 1, 0),
     DEF_TIM(TIM3,  CH4, PB1,  TIM_USE_MC_MOTOR | TIM_USE_FW_SERVO, 1, 0),
 
-    DEF_TIM(TIM5,  CH3, PA2,  TIM_USE_ANY, 0, 0),
+    DEF_TIM(TIM5,  CH3, PA2,  TIM_USE_LED, 0, 0),
     DEF_TIM(TIM5,  CH4, PA3,  TIM_USE_ANY, 0, 0),
 
 #ifdef WINGFC
