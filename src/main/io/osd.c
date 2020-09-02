@@ -110,7 +110,6 @@ FILE_COMPILE_FOR_SPEED
 #endif
 
 #define VIDEO_BUFFER_CHARS_PAL    480
-#define IS_DISPLAY_PAL (displayScreenSize(osdDisplayPort) == VIDEO_BUFFER_CHARS_PAL)
 
 #define GFORCE_FILTER_TC 0.2
 
@@ -199,6 +198,11 @@ static int digitCount(int32_t value)
         digits++;
     }
     return digits;
+}
+
+bool osdDisplayIsPAL(void)
+{
+    return displayScreenSize(osdDisplayPort) == VIDEO_BUFFER_CHARS_PAL;
 }
 
 /**
@@ -601,6 +605,19 @@ static void osdFormatCoordinate(char *buff, char sym, int32_t val)
         total++;
     }
     buff[coordinateLength] = '\0';
+}
+
+static void osdFormatCraftName(char *buff)
+{
+    if (strlen(systemConfig()->name) == 0)
+            strcpy(buff, "CRAFT_NAME");
+    else {
+        for (int i = 0; i < MAX_NAME_LENGTH; i++) {
+            buff[i] = sl_toupper((unsigned char)systemConfig()->name[i]);
+            if (systemConfig()->name[i] == 0)
+                break;
+        }
+    }
 }
 
 // Used twice, make sure it's exactly the same string
@@ -1194,7 +1211,7 @@ static bool osdDrawSingleElement(uint8_t item)
     uint8_t elemPosX = OSD_X(pos);
     uint8_t elemPosY = OSD_Y(pos);
     textAttributes_t elemAttr = TEXT_ATTRIBUTES_NONE;
-    char buff[32];
+    char buff[32] = {0};
 
     switch (item) {
     case OSD_RSSI_VALUE:
@@ -1583,15 +1600,7 @@ static bool osdDrawSingleElement(uint8_t item)
         }
 
     case OSD_CRAFT_NAME:
-        if (strlen(systemConfig()->name) == 0)
-            strcpy(buff, "CRAFT_NAME");
-        else {
-            for (int i = 0; i < MAX_NAME_LENGTH; i++) {
-                buff[i] = sl_toupper((unsigned char)systemConfig()->name[i]);
-                if (systemConfig()->name[i] == 0)
-                    break;
-            }
-        }
+        osdFormatCraftName(buff);
         break;
 
     case OSD_THROTTLE_POS:
@@ -1625,6 +1634,50 @@ static bool osdDrawSingleElement(uint8_t item)
             displayWriteWithAttr(osdDisplayPort, elemPosX, elemPosY, buff, elemAttr);
             return true;
         }
+
+    case OSD_CRSF_RSSI_DBM:
+            if (rxLinkStatistics.activeAnt == 0) {
+              buff[0] = SYM_RSSI;
+              tfp_sprintf(buff + 1, "%4d%c", rxLinkStatistics.uplinkRSSI, SYM_DBM);
+              if (!failsafeIsReceivingRxData()){
+                  TEXT_ATTRIBUTES_ADD_BLINK(elemAttr);
+              }
+            } else {
+              buff[0] = SYM_2RSS;
+              tfp_sprintf(buff + 1, "%4d%c", rxLinkStatistics.uplinkRSSI, SYM_DBM);
+              if (!failsafeIsReceivingRxData()){
+                  TEXT_ATTRIBUTES_ADD_BLINK(elemAttr);
+              }
+            }
+            break;
+
+    case OSD_CRSF_LQ:
+        buff[0] = SYM_BLANK;
+        tfp_sprintf(buff + 1, "%d:%3d%s", rxLinkStatistics.rfMode, rxLinkStatistics.uplinkLQ, "%");
+        if (!failsafeIsReceivingRxData()){
+            TEXT_ATTRIBUTES_ADD_BLINK(elemAttr);
+        }
+        break;
+
+    case OSD_CRSF_SNR_DB: {
+        const char* hidesnr = "    ";
+        int16_t osdSNR_Alarm = rxLinkStatistics.uplinkSNR;
+        if (osdSNR_Alarm <= osdConfig()->snr_alarm) {
+          buff[0] = SYM_SRN;
+          tfp_sprintf(buff + 1, "%4d%c", rxLinkStatistics.uplinkSNR, SYM_DB);
+        }
+        else if (osdSNR_Alarm > osdConfig()->snr_alarm) {
+          //displayWrite(osdDisplayPort, elemPosX, elemPosY, "     ");
+          buff[0] = SYM_SRN;
+          tfp_sprintf(buff + 1, "%s%c", hidesnr, SYM_DB);
+        }
+        break;
+      }
+
+    case OSD_CRSF_TX_POWER: {
+        tfp_sprintf(buff, "%4d%c", rxLinkStatistics.uplinkTXPower, SYM_MW);
+        break;
+    }
 
     case OSD_CROSSHAIRS: // Hud is a sub-element of the crosshair
 
@@ -2548,7 +2601,6 @@ PG_RESET_TEMPLATE(osdConfig_t, osdConfig,
     .ahi_width = OSD_AHI_WIDTH * OSD_CHAR_WIDTH,
     .ahi_height = OSD_AHI_HEIGHT * OSD_CHAR_HEIGHT,
     .ahi_vertical_offset = -OSD_CHAR_HEIGHT,
-    .sidebar_horizontal_offset = OSD_AH_SIDEBAR_WIDTH_POS * OSD_CHAR_WIDTH,
 );
 
 void pgResetFn_osdLayoutsConfig(osdLayoutsConfig_t *osdLayoutsConfig)
@@ -2595,6 +2647,13 @@ void pgResetFn_osdLayoutsConfig(osdLayoutsConfig_t *osdLayoutsConfig)
 
     osdLayoutsConfig->item_pos[0][OSD_CRAFT_NAME] = OSD_POS(20, 2);
     osdLayoutsConfig->item_pos[0][OSD_VTX_CHANNEL] = OSD_POS(8, 6);
+
+#ifdef USE_SERIALRX_CRSF
+    osdLayoutsConfig->item_pos[0][OSD_CRSF_RSSI_DBM] = OSD_POS(23, 12);
+    osdLayoutsConfig->item_pos[0][OSD_CRSF_LQ] = OSD_POS(22, 11);
+    osdLayoutsConfig->item_pos[0][OSD_CRSF_SNR_DB] = OSD_POS(23, 9);
+    osdLayoutsConfig->item_pos[0][OSD_CRSF_TX_POWER] = OSD_POS(24, 10);
+#endif
 
     osdLayoutsConfig->item_pos[0][OSD_ONTIME] = OSD_POS(23, 8);
     osdLayoutsConfig->item_pos[0][OSD_FLYTIME] = OSD_POS(23, 9);
@@ -2685,7 +2744,7 @@ void pgResetFn_osdLayoutsConfig(osdLayoutsConfig_t *osdLayoutsConfig)
 
     for (unsigned ii = 1; ii < OSD_LAYOUT_COUNT; ii++) {
         for (unsigned jj = 0; jj < ARRAYLEN(osdLayoutsConfig->item_pos[0]); jj++) {
-             osdLayoutsConfig->item_pos[ii][jj] = osdLayoutsConfig->item_pos[0][jj] & ~OSD_VISIBLE_FLAG;
+            osdLayoutsConfig->item_pos[ii][jj] = osdLayoutsConfig->item_pos[0][jj] & ~OSD_VISIBLE_FLAG;
         }
     }
 }
@@ -2869,7 +2928,7 @@ static void osdShowStats(void)
 
     displayBeginTransaction(osdDisplayPort, DISPLAY_TRANSACTION_OPT_RESET_DRAWING);
     displayClearScreen(osdDisplayPort);
-    if (IS_DISPLAY_PAL)
+    if (osdDisplayIsPAL())
         displayWrite(osdDisplayPort, statNameX, top++, "  --- STATS ---");
 
     if (STATE(GPS_FIX)) {
@@ -2971,14 +3030,21 @@ static void osdShowArmed(void)
 {
     dateTime_t dt;
     char buf[MAX(32, FORMATTED_DATE_TIME_BUFSIZE)];
+    char craftNameBuf[MAX_NAME_LENGTH];
     char *date;
     char *time;
-    // We need 7 visible rows
-    uint8_t y = MIN((osdDisplayPort->rows / 2) - 1, osdDisplayPort->rows - 7 - 1);
+    // We need 10 visible rows
+    uint8_t y = MIN((osdDisplayPort->rows / 2) - 1, osdDisplayPort->rows - 10 - 1);
 
     displayClearScreen(osdDisplayPort);
     displayWrite(osdDisplayPort, 12, y, "ARMED");
     y += 2;
+
+    if (strlen(systemConfig()->name) > 0) {
+        osdFormatCraftName(craftNameBuf);
+        displayWrite(osdDisplayPort, (osdDisplayPort->cols - strlen(systemConfig() -> name)) / 2, y, craftNameBuf );
+        y += 2;
+    }
 
 #if defined(USE_GPS)
     if (feature(FEATURE_GPS)) {
@@ -2991,6 +3057,16 @@ static void osdShowArmed(void)
             olc_encode(GPS_home.lat, GPS_home.lon, digits, buf, sizeof(buf));
             displayWrite(osdDisplayPort, (osdDisplayPort->cols - strlen(buf)) / 2, y + 2, buf);
             y += 4;
+#if defined (USE_SAFE_HOME)
+            if (isSafeHomeInUse()) {
+                textAttributes_t elemAttr = _TEXT_ATTRIBUTES_BLINK_BIT;
+                char buf2[12]; // format the distance first
+                osdFormatDistanceStr(buf2, safehome_distance);
+                tfp_sprintf(buf, "%c - %s -> SAFEHOME %u", SYM_HOME, buf2, safehome_used);
+                // write this message above the ARMED message to make it obvious
+                displayWriteWithAttr(osdDisplayPort, (osdDisplayPort->cols - strlen(buf)) / 2, y - 8, buf, elemAttr);
+            }
+#endif
         } else {
             strcpy(buf, "!NO HOME POSITION!");
             displayWrite(osdDisplayPort, (osdDisplayPort->cols - strlen(buf)) / 2, y, buf);
@@ -3050,7 +3126,12 @@ static void osdRefresh(timeUs_t currentTimeUs)
         if (ARMING_FLAG(ARMED)) {
             osdResetStats();
             osdShowArmed(); // reset statistic etc
-            osdSetNextRefreshIn(ARMED_SCREEN_DISPLAY_TIME);
+            uint32_t delay = ARMED_SCREEN_DISPLAY_TIME;
+#if defined(USE_SAFE_HOME)
+            if (isSafeHomeInUse())
+                delay *= 3;
+#endif
+            osdSetNextRefreshIn(delay);
         } else {
             osdShowStats(); // show statistic
             osdSetNextRefreshIn(STATS_SCREEN_DISPLAY_TIME);
