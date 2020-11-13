@@ -10,22 +10,22 @@ tables:
     values: ["NONE", "HCSR04", "SRF10", "INAV_I2C", "VL53L0X", "MSP", "UIB", "BENEWAKE"]
     enum: rangefinderType_e
   - name: mag_hardware
-    values: ["NONE", "AUTO", "HMC5883", "AK8975", "GPSMAG", "MAG3110", "AK8963", "IST8310", "QMC5883", "MPU9250", "IST8308", "LIS3MDL", "FAKE"]
+    values: ["NONE", "AUTO", "HMC5883", "AK8975", "GPSMAG", "MAG3110", "AK8963", "IST8310", "QMC5883", "MPU9250", "IST8308", "LIS3MDL", "MSP", "FAKE"]
     enum: magSensor_e
   - name: opflow_hardware
     values: ["NONE", "PMW3901", "CXOF", "MSP", "FAKE"]
     enum: opticalFlowSensor_e
   - name: baro_hardware
-    values: ["NONE", "AUTO", "BMP085", "MS5611", "BMP280", "MS5607", "LPS25H", "SPL06", "BMP388", "DPS310", "FAKE"]
+    values: ["NONE", "AUTO", "BMP085", "MS5611", "BMP280", "MS5607", "LPS25H", "SPL06", "BMP388", "DPS310", "MSP", "FAKE"]
     enum: baroSensor_e
   - name: pitot_hardware
-    values: ["NONE", "AUTO", "MS4525", "ADC", "VIRTUAL", "FAKE"]
+    values: ["NONE", "AUTO", "MS4525", "ADC", "VIRTUAL", "FAKE", "MSP"]
     enum: pitotSensor_e
   - name: receiver_type
     values: ["NONE", "PPM", "SERIAL", "MSP", "SPI", "UIB"]
     enum: rxReceiverType_e
   - name: serial_rx
-    values: ["SPEK1024", "SPEK2048", "SBUS", "SUMD", "SUMH", "XB-B", "XB-B-RJ01", "IBUS", "JETIEXBUS", "CRSF", "FPORT", "SBUS_FAST", "FPORT2"]
+    values: ["SPEK1024", "SPEK2048", "SBUS", "SUMD", "SUMH", "XB-B", "XB-B-RJ01", "IBUS", "JETIEXBUS", "CRSF", "FPORT", "SBUS_FAST", "FPORT2", "SRXL2"]
   - name: rx_spi_protocol
     values: ["V202_250K", "V202_1M", "SYMA_X", "SYMA_X5C", "CX10", "CX10A", "H8_3D", "INAV", "ELERES"]
     enum: rx_spi_protocol_e
@@ -44,7 +44,7 @@ tables:
     values: ["NONE", "ADC", "ESC"]
     enum: voltageSensor_e
   - name: gps_provider
-    values: ["NMEA", "UBLOX", "UNUSED", "NAZA", "UBLOX7", "MTK"]
+    values: ["NMEA", "UBLOX", "UNUSED", "NAZA", "UBLOX7", "MTK", "MSP"]
     enum: gpsProvider_e
   - name: gps_sbas_mode
     values: ["AUTO", "EGNOS", "WAAS", "MSAS", "GAGAN", "NONE"]
@@ -125,7 +125,7 @@ tables:
     values: ["OFF", "RP", "RPY"]
     enum: itermRelax_e
   - name: airmodeHandlingType
-    values: ["STICK_CENTER", "THROTTLE_THRESHOLD"]
+    values: ["STICK_CENTER", "THROTTLE_THRESHOLD", "STICK_CENTER_ONCE"]
   - name: nav_extra_arming_safety
     values: ["OFF", "ON", "ALLOW_BYPASS"]
     enum: navExtraArmingSafety_e
@@ -144,6 +144,11 @@ tables:
   - name: tristate
     enum: tristate_e
     values: ["AUTO", "ON", "OFF"]
+  - name: osd_crsf_lq_format
+    enum: osd_crsf_lq_format_e
+    values: ["TYPE1", "TYPE2"]
+  - name: off_on
+    values: ["OFF", "ON"]
 
 groups:
   - name: PG_GYRO_CONFIG
@@ -567,6 +572,13 @@ groups:
         condition: USE_SPEKTRUM_BIND
         min: SPEKTRUM_SAT_BIND_DISABLED
         max: SPEKTRUM_SAT_BIND_MAX
+      - name: srxl2_unit_id
+        condition: USE_SERIALRX_SRXL2
+        min: 0
+        max: 15
+      - name: srxl2_baud_fast
+        condition: USE_SERIALRX_SRXL2
+        table: off_on
       - name: rx_min_usec
         description: "Defines the shortest pulse width value used when ensuring the channel value is valid. If the receiver gives a pulse value lower than this value then the channel will be marked as bad and will default to the value of mid_rc."
         default_value: "885"
@@ -1539,6 +1551,12 @@ groups:
         field: fixedWingCoordinatedYawGain
         min: 0
         max: 2
+      - name: fw_turn_assist_pitch_gain
+        description: "Gain required to keep constant pitch angle during coordinated turns (in TURN_ASSIST mode). Value significantly different from 1.0 indicates a problem with the airspeed calibration (if present) or value of `fw_reference_airspeed` parameter"
+        default_value: "1"
+        field: fixedWingCoordinatedPitchGain
+        min: 0
+        max: 2
       - name: fw_iterm_limit_stick_position
         description: "Iterm is not allowed to grow when stick position is above threshold. This solves the problem of bounceback or followthrough when full stick deflection is applied on poorely tuned fixed wings. In other words, stabilization is partialy disabled when pilot is actively controlling the aircraft and active when sticks are not touched. `0` mean stick is in center position, `1` means it is fully deflected to either side"
         default_value: "0.5"
@@ -1665,7 +1683,7 @@ groups:
         max: 100
       - name: nav_mc_vel_xy_dterm_attenuation_end
         description: "A point (in percent of both target and current horizontal velocity) where nav_mc_vel_xy_dterm_attenuation reaches maximum"
-        default_value: "60"  
+        default_value: "60"
         field: navVelXyDtermAttenuationEnd
         min: 0
         max: 100
@@ -2547,6 +2565,11 @@ groups:
         type: uint8_t
         min: 0
         max: 255
+      - name: mavlink_extra3_rate
+        field: mavlink.extra3_rate
+        type: uint8_t
+        min: 0
+        max: 255
   - name: PG_ELERES_CONFIG
     type: eleresConfig_t
     headers: ["rx/eleres.h"]
@@ -2619,7 +2642,7 @@ groups:
         type: uint8_t
 
       - name: osd_rssi_alarm
-        description: "Value bellow which to make the OSD RSSI indicator blink"
+        description: "Value below which to make the OSD RSSI indicator blink"
         default_value: "20"
         field: rssi_alarm
         min: 0
@@ -2643,7 +2666,7 @@ groups:
         min: 0
         max: 50000
       - name: osd_neg_alt_alarm
-        description: "Value bellow which (negative altitude) to make the OSD relative altitude indicator blink (meters)"
+        description: "Value below which (negative altitude) to make the OSD relative altitude indicator blink (meters)"
         default_value: "5"
         field: neg_alt_alarm
         min: 0
@@ -2712,10 +2735,16 @@ groups:
         max: 1250
       - name: osd_snr_alarm
         description: "Value below which Crossfire SNR Alarm pops-up. (dB)"
-        default_value: "8"
+        default_value: "4"
         field: snr_alarm
         min: -12
         max: 8
+      - name: osd_link_quality_alarm
+        description: "LQ % indicator blinks below this value. For Crossfire use 70%, for Tracer use 50%"
+        default_value: "70"
+        field: link_quality_alarm
+        min: 0
+        max: 100
       - name: osd_temp_label_align
         description: "Allows to chose between left and right alignment for the OSD temperature sensor labels. Valid values are `LEFT` and `RIGHT`"
         default_value: "LEFT"
@@ -2738,6 +2767,12 @@ groups:
         default_value: "DEFAULT"
         field: crosshairs_style
         table: osd_crosshairs_style
+        type: uint8_t
+      - name: osd_crsf_lq_format
+        description: "To select LQ format"
+        default_value: "TYPE1"
+        field: crsf_lq_format
+        table: osd_crsf_lq_format
         type: uint8_t
       - name: osd_horizon_offset
         description: "To vertically adjust the whole OSD and AHI and scrolling bars"
@@ -3012,6 +3047,7 @@ groups:
   - name: PG_VTX_SETTINGS_CONFIG
     type: vtxSettingsConfig_t
     headers: ["drivers/vtx_common.h", "io/vtx.h"]
+    condition: USE_VTX_SMARTAUDIO || USE_VTX_TRAMP
     members:
       - name: vtx_band
         description: "Configure the VTX band. Set to zero to use `vtx_freq`. Bands: 1: A, 2: B, 3: E, 4: F, 5: Race."
