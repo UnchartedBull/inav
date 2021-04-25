@@ -93,7 +93,6 @@
 #define SPI2_MISO_PIN           PB14
 #define SPI2_MOSI_PIN           PB15
 
-//#define USE_RX_SPI
 #define RX_SPI_INSTANCE SPI2
 #define RX_NSS_PIN PB3
 
@@ -120,8 +119,8 @@
 #define CURRENT_METER_ADC_CHANNEL   ADC_CHN_2
 #define RSSI_ADC_CHANNEL            ADC_CHN_3
 
-#define USE_LED_STRIP
-#define WS2811_PIN                      PA8
+//#define USE_LED_STRIP
+//#define WS2811_PIN                      PA8
 
 //#define ENABLE_BLACKBOX_LOGGING_ON_SDCARD_BY_DEFAULT
 

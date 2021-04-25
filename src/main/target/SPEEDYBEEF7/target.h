@@ -22,6 +22,9 @@
 
 #define LED0                    PC14
 
+#define BEEPER                  PC13
+#define BEEPER_INVERTED
+
 // UARTs
 #define USB_IO
 #define USE_VCP
@@ -117,7 +120,7 @@
 #define USE_MAG_LIS3MDL
 
 #define TEMPERATURE_I2C_BUS     BUS_I2C2
-
+#define BNO055_I2C_BUS          BUS_I2C2
 #define PITOT_I2C_BUS           BUS_I2C2
 
 #define USE_RANGEFINDER
@@ -158,5 +161,3 @@
 #define TARGET_IO_PORTB         0xffff
 #define TARGET_IO_PORTC         0xffff
 #define TARGET_IO_PORTD         (BIT(2))
-
-
