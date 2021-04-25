@@ -116,17 +116,17 @@
 #ifdef FLYWOOF411_V2
 #define UART2_TX_PIN            PA2
 #else
-#define UART2_TX_PIN            NONE    //PA2
+#define UART2_TX_PIN            PA2
 #endif
-#define UART2_RX_PIN            PA3
+#define UART2_RX_PIN            NONE
 
 #define USE_SOFTSERIAL1
 #ifdef FLYWOOF411_V2
 #define SOFTSERIAL_1_TX_PIN     PB6     // Clash with TX2, possible to use as S.Port or VTX control
 #define SOFTSERIAL_1_RX_PIN     PB7
 #else
-#define SOFTSERIAL_1_TX_PIN     PA2     // Clash with TX2, possible to use as S.Port or VTX control
-#define SOFTSERIAL_1_RX_PIN     PA2
+#define SOFTSERIAL_1_TX_PIN     PA3     // Clash with RX2, possible to use as S.Port or VTX control
+#define SOFTSERIAL_1_RX_PIN     PA3
 #endif
 
 #define SERIAL_PORT_COUNT       4       // VCP, USART1, USART2, SS1
