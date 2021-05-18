@@ -44,8 +44,7 @@ const timerHardware_t timerHardware[] = {
 
     DEF_TIM(TIM3, CH4, PB1,  TIM_USE_ANY,   0, 0), //  RSSI   1,2
     DEF_TIM(TIM5, CH4, PA3,  TIM_USE_ANY,   0, 1), //  RX2    1,0
-    DEF_TIM(TIM2, CH3, PB10, TIM_USE_ANY,   0, 0), //  CAM_C    1,0
-    DEF_TIM(TIM2, CH1, PA15, TIM_USE_LED,   0, 0), //  LED    1,5
+    DEF_TIM(TIM2, CH1, PA15, TIM_USE_ANY,   0, 0), //  LED    1,5
 #endif
 };
 
