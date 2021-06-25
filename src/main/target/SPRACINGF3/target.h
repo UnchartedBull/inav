@@ -42,7 +42,6 @@
 
 #define USE_MAG
 #define MAG_I2C_BUS             BUS_I2C1
-#define MAG_HMC5883_ALIGN       CW270_DEG
 #define USE_MAG_HMC5883
 #define USE_MAG_QMC5883
 #define USE_MAG_IST8310
@@ -92,11 +91,6 @@
 #define VBAT_ADC_CHANNEL                ADC_CHN_1
 #define CURRENT_METER_ADC_CHANNEL       ADC_CHN_2
 #define RSSI_ADC_CHANNEL                ADC_CHN_3
-
-#define USE_DJI_HD_OSD
-#define USE_OSD
-#undef USE_CMS
-#undef CMS_MENU_OSD
 
 #define USE_LED_STRIP
 #define WS2811_PIN                      PA8

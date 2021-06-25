@@ -225,7 +225,7 @@ static uint8_t osdUpdateSidebar(osd_sidebar_scroll_e scroll, osd_sidebar_t *side
     // Scroll between SYM_AH_DECORATION_MIN and SYM_AH_DECORATION_MAX.
     // Zero scrolling should draw SYM_AH_DECORATION.
     uint8_t decoration = SYM_AH_DECORATION;
-    int offset;
+    int offset = 0;
     int steps;
     switch (scroll) {
         case OSD_SIDEBAR_SCROLL_NONE:
@@ -237,11 +237,9 @@ static uint8_t osdUpdateSidebar(osd_sidebar_scroll_e scroll, osd_sidebar_t *side
             offset = osdGetAltitude();
             steps = offset / 20;
             break;
-        case OSD_SIDEBAR_SCROLL_GROUND_SPEED:
+        case OSD_SIDEBAR_SCROLL_SPEED:
 #if defined(USE_GPS)
             offset = gpsSol.groundSpeed;
-#else
-            offset = 0;
 #endif
             // Move 1 char for every 20 cm/s
             steps = offset / 20;
@@ -249,8 +247,6 @@ static uint8_t osdUpdateSidebar(osd_sidebar_scroll_e scroll, osd_sidebar_t *side
         case OSD_SIDEBAR_SCROLL_HOME_DISTANCE:
 #if defined(USE_GPS)
             offset = GPS_distanceToHome;
-#else
-            offset = 0;
 #endif
             // Move 1 char for every 5m
             steps = offset / 5;
@@ -299,7 +295,7 @@ void osdGridDrawSidebars(displayPort_t *display)
     uint8_t rightDecoration = osdUpdateSidebar(osdConfig()->right_sidebar_scroll, &right, currentTimeMs);
 
     const int hudwidth = OSD_AH_SIDEBAR_WIDTH_POS;
-    const int hudheight = OSD_AH_SIDEBAR_HEIGHT_POS;
+    const int hudheight = osdConfig()->sidebar_height;
 
     // Arrows
     if (osdConfig()->sidebar_scroll_arrows) {
@@ -319,11 +315,12 @@ void osdGridDrawSidebars(displayPort_t *display)
     // Draw AH sides
     int leftX = MAX(elemPosX - hudwidth - osdConfig()->sidebar_horizontal_offset, 0);
     int rightX = MIN(elemPosX + hudwidth + osdConfig()->sidebar_horizontal_offset, display->cols - 1);
-    for (int y = -hudheight; y <= hudheight; y++) {
-        displayWriteChar(display, leftX, elemPosY + y, leftDecoration);
-        displayWriteChar(display, rightX, elemPosY + y, rightDecoration);
+    if (osdConfig()->sidebar_height) {
+        for (int y = -hudheight; y <= hudheight; y++) {
+            displayWriteChar(display, leftX, elemPosY + y, leftDecoration);
+            displayWriteChar(display, rightX, elemPosY + y, rightDecoration);
+        }
     }
-
     // AH level indicators
     displayWriteChar(display, leftX + 1, elemPosY, SYM_AH_RIGHT);
     displayWriteChar(display, rightX - 1, elemPosY, SYM_AH_LEFT);
